@@ -7,8 +7,19 @@ from streamlit_folium import folium_static
 
 st.title("📊 Peta & Statistik Harga Komoditas")
 
+# ==== Sidebar Upload ====
+st.sidebar.header("📁 Upload Data")
+uploaded_file = st.sidebar.file_uploader("Unggah File Excel", type=["xlsx"])
+
 # Load data
-df = pd.read_excel("Data Harga Komoditas.xlsx")
+if uploaded_file:
+    df = pd.read_excel(uploaded_file)
+    st.success("✅ File berhasil diunggah!")
+else:
+    df = pd.read_excel("Data Harga Komoditas.xlsx")
+    st.info("📌 Menggunakan data default karena tidak ada file diunggah.")
+
+# Load GeoJSON (gunakan default)
 with open("prov 38.json", "r") as f:
     geojson = json.load(f)
 
@@ -38,6 +49,7 @@ filtered_df["Provinsi"] = filtered_df["Provinsi"].str.upper().str.strip()
 # Agregasi per provinsi
 agg_df = filtered_df.groupby("Provinsi").agg({"harga": agregasi_func}).reset_index()
 
+# Ubah nama provinsi di GeoJSON agar cocok
 for feature in geojson["features"]:
     feature["properties"]["PROVINSI"] = feature["properties"]["PROVINSI"].upper()
 
@@ -56,7 +68,7 @@ choropleth = folium.Choropleth(
     data=agg_df,
     columns=["Provinsi", "harga"],
     key_on="feature.properties.PROVINSI",
-    fill_color="viridis",
+    fill_color="YlOrRd",
     fill_opacity=0.7,
     line_opacity=0.2,
     legend_name=f"Harga {selected_bahan} ({selected_agregasi_label})",
@@ -79,7 +91,6 @@ for feature in geojson["features"]:
 st.subheader(f"Peta Harga per Provinsi - {tanggal_terakhir}")
 folium_static(m)
 
-
 # Grafik Perbandingan Harga (Bar Chart)
 bar_fig = px.bar(
     agg_df,
@@ -88,7 +99,7 @@ bar_fig = px.bar(
     title=f"Perbandingan Harga {selected_bahan} per Provinsi ({selected_agregasi_label}) - {tanggal_terakhir}",
     labels={"harga": "Harga", "Provinsi": "Provinsi"},
     color="harga",
-    color_continuous_scale="viridis"
+    color_continuous_scale="YlOrRd"
 )
 st.plotly_chart(bar_fig, use_container_width=True)
 
