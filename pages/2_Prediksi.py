@@ -16,10 +16,8 @@ output_model = 'model_rf_harga.pkl'
 url_encoder = 'https://drive.google.com/uc?id=1vmcx3F1c95ufQnQLaaWPmSzDsms3VnCr'
 output_encoder = 'label_encoder_dict.pkl'
 
-if not os.path.exists(output_model):
-    gdown.download(url_model, output_model, quiet=False)
-if not os.path.exists(output_encoder):
-    gdown.download(url_encoder, output_encoder, quiet=False)
+gdown.download(url_model, output_model, quiet=False)
+gdown.download(url_encoder, output_encoder, quiet=False)
 
 # === Load model dan encoder ===
 model = joblib.load(output_model)
